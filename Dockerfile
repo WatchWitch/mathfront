@@ -1,0 +1,19 @@
+# Используем официальный образ Python
+FROM python:3.9-slim
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файлы проекта
+COPY MultipleFiles/ ./MultipleFiles/
+COPY frontend/ ./frontend/
+COPY requirements.txt ./
+
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Открываем порт
+EXPOSE 500
+
+# Запускаем API
+CMD ["python", "MultipleFiles/api.py"]

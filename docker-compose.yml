@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
+    depends_on:
+      - worker
+
+  worker:
+    build: .
+    command: python MultipleFiles/worker.py
+    volumes:
+      - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
