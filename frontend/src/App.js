@@ -17,7 +17,7 @@ function App() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { username, password });
+      const response = await axios.post('http://127.0.0.1:5000/api/login', { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       setToken(token);
@@ -38,7 +38,7 @@ function App() {
     setStatus('Отправка...');
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/tasks',
+        'http://127.0.0.1:5000/api/tasks',
         { expression, point_a: pointA, point_b: pointB, ttl },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -51,7 +51,7 @@ function App() {
 
   const fetchTasks = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/tasks', {
+      const response = await axios.get('http://127.0.0.1:5000/api/tasks', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(response.data);
@@ -212,10 +212,10 @@ function App() {
           </ul>
           <ul className="links">
             <li><a href='/#'>Home</a></li>
-            <li><a href='/github'>Github</a></li>
+            <li><a href='https://github.com/WatchWitch/mathfront'>Github</a></li>
             <li><a href='/team'>Team</a></li>
           </ul>
-          <p className="legal">© 2024 All rights reserved</p>
+          <p className="legal">© 2025 All rights reserved</p>
         </section>
       </footer>
     </div>
