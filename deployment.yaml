@@ -1,19 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mathfront-api
+  # name: mathfront-api
+  name: redis
 spec:
-  replicas: 3
+  replicas: 1 #3
   selector:
     matchLabels:
-      app: mathfront
+      app: redis # mathfront
   template:
     metadata:
       labels:
-        app: mathfront
+        app: redis #mathfront
     spec:
       containers:
-      - name: api
-        image: sowola/mathfront:latest
+      - name: redis # api
+        image: sowola/redis:latest
         ports:
-        - containerPort: 5000
+        - containerPort: 6379 # 5000
