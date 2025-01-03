@@ -1,14 +1,16 @@
+from celery import Celery
 import sqlite3
-import time
-from decimal import Decimal, getcontext
+from decimal import getcontext
 import sympy as sp  
 from datetime import datetime
 
 getcontext().prec = 15
 
+# Создаем экземпляр Celery с использованием Redis в качестве брокера
+celery = Celery('tasks', broker='redis://localhost:6379/0')
+
 def eval_func(expr, x):
     try:
-        # Преобразуем строку в символическое выражение через sympy
         sym_expr = sp.sympify(expr)
         return float(sym_expr.subs('x', x))
     except ZeroDivisionError:
@@ -17,13 +19,13 @@ def eval_func(expr, x):
         return "error"
     except Exception as e:
         return float('nan')
-    
+
 def bisection_method(expr, a, b, tolerance=0.0001):
     f_a = eval_func(expr, a)
     f_b = eval_func(expr, b)
 
-    if f_a * f_b <= 0:
-        return None  
+    if f_a * f_b > 0:
+        return None  # Нет корней в интервале
 
     while (b - a) / 2.0 > tolerance:
         c = (a + b) / 2.0
@@ -88,8 +90,7 @@ def insert_task_result(conn, task_id, status, accepted_at, completed_at, express
         segment_result = round(segment_result, 3) if segment_result is not None else None
     except:
         segment_result = None  
-    #print(task_id, status, accepted_at, completed_at, expression, newton_result, segment_result)
-    # Убедитесь, что expression не пустое или None
+
     cursor.execute("""
         UPDATE task
         SET status = ?, completed_at = ?, segment_result = ?, newton_result = ?
@@ -97,6 +98,7 @@ def insert_task_result(conn, task_id, status, accepted_at, completed_at, express
     """, (status, completed_at, segment_result, newton_result, task_id))
     conn.commit()
 
+@celery.task
 def process_task(task_id):
     conn = sqlite3.connect('./instance/tasks_data.db')
     cursor = conn.cursor()
@@ -108,14 +110,12 @@ def process_task(task_id):
     if result:
         expression, point_a, point_b, ttl, accepted_at = result
         accepted_at = datetime.strptime(accepted_at, "%Y-%m-%d %H:%M:%S.%f")
-        #print("Начал в ",accepted_at)
     else:
         return None  # Если запись с таким id не найдена
 
     status = "В процессе"
     completed_at = None  
     newton_result = segment_result = None  
-    completed_at = None  
     try:
         expression = preprocess_equation(expression)
         
@@ -136,20 +136,16 @@ def process_task(task_id):
         root_bisection = bisection_method(expression, a, b)
         root_newton = newton_method(expression, x0)
         end_time = datetime.now()
-        #print("Закончил в ", end_time )
         elapsed_time = end_time - accepted_at
-        #print("Разница в ",elapsed_time)
-        print("время работы = ",elapsed_time.total_seconds())
+
         if elapsed_time.total_seconds() <= ttl:  # Условие для успешного завершения
             status = "Решено"
             completed_at = end_time  # Устанавливаем время завершения
             segment_result = root_bisection
             newton_result = root_newton
-            #print("Статус = ", status," Ответы линейного метода и Ньютона = ", segment_result ," ", newton_result)
         else:
             status = "Не уложился в TTL"
 
-        #print(conn, task_id, status, accepted_at, completed_at, newton_result, segment_result)
         insert_task_result(conn, task_id, status, accepted_at, completed_at, expression, newton_result, segment_result)
 
     except SyntaxError:
@@ -160,6 +156,3 @@ def process_task(task_id):
         insert_task_result(conn, task_id, status, accepted_at, completed_at, expression, newton_result, segment_result)
 
     conn.close()
-
-    if __name__ == '__main__':
-        process_task(task_id)
