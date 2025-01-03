@@ -1,17 +1,57 @@
 version: '3.8'
 
 services:
-  api:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  web:
     build: .
+    command: python MultipleFiles/api.py
+    volumes:
+      - ./instance:/app/instance
     ports:
       - "5000:5000"
-    volumes:
-      - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
     depends_on:
-      - worker
+      - redis
 
   worker:
     build: .
-    command: python MultipleFiles/worker.py
+    # command: python MultipleFiles/worker.py
+    command: celery -A MultipleFiles.tasks worker --loglevel=info
     volumes:
+      - ./instance:/app/instance
       - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
+    depends_on:
+      - redis  # Redis запущен перед worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0  # URL для подключения к Redis
+    # volumes:
+    #   - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
+    # depends_on:
+    #   rabbitmq: 
+    #      condition: service_healthy
+    # environment:
+    #   - RABBITMQ_HOST=rabbitmq
+    #   - RABBITMQ_USER=admin  # имя пользователя
+    #   - RABBITMQ_PASS=password123  # пароль
+    # networks:
+     #  - my_network  # Указываем сеть
+    
+  #   api:
+   #    build: .
+   #    ports:
+   #      - "5000:5000"
+   #    volumes:
+  #       - ./MultipleFiles/task_data.db:/app/MultipleFiles/task_data.db
+  #     depends_on:
+   #      - worker
+  #     #   - rabbitmq
+  #     networks:
+   #      - my_network  # Указываем сеть
+ 
+
+networks:
+  my_network:  # Определяем сеть
+
