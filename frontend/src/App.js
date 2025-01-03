@@ -212,10 +212,10 @@ function App() {
           </ul>
           <ul className="links">
             <li><a href='/#'>Home</a></li>
-            <li><a href='/github'>Github</a></li>
+            <li><a href='https://github.com/WatchWitch/mathfront'>Github</a></li>
             <li><a href='/team'>Team</a></li>
           </ul>
-          <p className="legal">© 2024 All rights reserved</p>
+          <p className="legal">© 2025 All rights reserved</p>
         </section>
       </footer>
     </div>
