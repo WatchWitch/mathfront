@@ -3,13 +3,26 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_cors import CORS
 import jwt
-from worker import process_task
+from celery import Celery
+from tasks import process_task
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks_data.db'  # Заменить на БД
 app.config['SECRET_KEY'] = 'your_secret_key'  # Секретный ключ для JWT
+app.config['RESULT_BACKEND'] = 'db+sqlite:///results.sqlite'  # Настройка для Celery
+app.config['BROKER_URL'] = 'redis://redis:6379/0'  # Настройка для Celery
+
 db = SQLAlchemy(app)
 CORS(app)
+
+def make_celery(app):
+    celery = Celery(app.import_name, backend=app.config['RESULT_BACKEND'], broker=app.config['BROKER_URL'])
+    celery.conf.update(app.config)
+    return celery
+
+# Создание экземпляра Celery
+celery = make_celery(app)
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,7 +98,7 @@ def create_task():
     db.session.commit()
 
     # Запускаем выполнение задачи в фоновом режиме
-    process_task(task.id)
+    process_task.delay(task.id)  # Используем Celery для выполнения задачи
 
     return jsonify({'task_id': task.id}), 201
 
