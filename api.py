@@ -6,7 +6,7 @@ from flask_cors import CORS
 from worker import process_task 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks_data.db'  # Замените на вашу БД
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks_data.db'  # Заменить на БД
 db = SQLAlchemy(app)
 CORS(app)
 
