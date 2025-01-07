@@ -3,5 +3,4 @@ Flask-SQLAlchemy
 Flask-Cors
 sympy
 PyJWT
-celery
-redis
+pika
