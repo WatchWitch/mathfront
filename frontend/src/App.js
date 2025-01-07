@@ -60,10 +60,20 @@ function App() {
     }
   };
 
+  const refreshTasks = () => {
+    fetchTasks();
+  };
+
   useEffect(() => {
     if (token) {
       setIsAuthenticated(true);
       fetchTasks();
+
+      const intervalId = setInterval(() => {
+        fetchTasks();
+      }, 5000);
+
+      return () => clearInterval(intervalId);
     }
   }, [token]);
 
@@ -100,7 +110,7 @@ function App() {
               <button onClick={handleLogout} className="mb-4 p-2 bg-red-500 rounded">Выйти</button>
               <div className="flex justify-between">
                 <div className="w-1/2 bg-gray-600 rounded-lg p-4 mr-4">
-                  <h2 className="text-white text-center mb-4">Ввод данных</h2>
+                  <h2 className="text-white text-center mb-4"> Ввод данных</h2>
                   <form onSubmit={handleSubmit}>
                     <input
                       type="text"
@@ -137,6 +147,7 @@ function App() {
                     <button className="w-full p-2 bg-white rounded">Решить</button>
                   </form>
                   <p className="text-red-500 text-center mt-2">{status}</p>
+                  <button onClick={refreshTasks} className="mt-4 w-full p-2 bg-blue-500 rounded">Обновить задачи</button>
                 </div>
                 <div className="w-1/2 bg-gray-600 rounded-lg p-4">
                   <h2 className="text-white text-center mb-4">Очередь задач</h2>
@@ -188,11 +199,11 @@ function App() {
                 <stop offset="0%" style={{ stopColor: 'rgba(53, 127, 242, 0.6)' }}></stop>
                 <stop offset="100%" style={{ stopColor: 'rgba(38, 89, 190, 0.06)' }}></stop>
               </linearGradient>
-              <path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0 s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
+              <path id="wave" fill="url(#bg)" d="M-363.852,502.589 c0,0,236.988-41.997,505.475,0 s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
             </defs>
             <g>
               <use xlinkHref="#wave" opacity=".3">
-                <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calc Mode="spline" values="270 230; -285 240; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
+                <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calcMode="spline" values="270 230; -285 240; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
               </use>
               <use xlinkHref="#wave" opacity=".6">
                 <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="6s" calcMode="spline" values="-270 230;243 280;-270 230" keyTimes="0; .6; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0" repeatCount="indefinite" />
@@ -204,12 +215,6 @@ function App() {
           </svg>
         </div>
         <section>
-          <ul className="socials">
-            <li><a className="fa-brands fa-facebook"></a></li>
-            <li><a className="fa-brands fa-twitter"></a></li>
-            <li><a className="fa-brands fa-linkedin"></a></li>
-            <li><a className="fa-brands fa-instagram"></a></li>
-          </ul>
           <ul className="links">
             <li><a href='/#'>Home</a></li>
             <li><a href='https://github.com/WatchWitch/mathfront'>Github</a></li>
