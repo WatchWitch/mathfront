@@ -3,9 +3,10 @@
 Для запуска проекта необходимо клонировать репозиторий.
 
 Открыть терминал в папке проекта и выполнить следующую команду
-bash
-docker-compose up --build
 
+```bash
+docker-compose up --build
+```
 
 Дождаться запуска сервиса и перейти на:
 1) localhost:3000 - web интерфейс сервиса
@@ -16,10 +17,13 @@ docker-compose up --build
 
 Если отправляемые задачи в web интерфейсе создаются с ошибкой, проверьте статус worker-ов в docker.
 
-bash
+```bash
 docker-compose logs worker
+```
 
 
 Если в логах обнаружены ошибка подключения, то перезапустите worker
-bash
+
+```bash
 docker-compose restart worker
+```
